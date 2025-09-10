@@ -44,15 +44,15 @@ data "aws_iam_policy_document" "codebuild_assume_role_policy" {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
       values = [
-        "repo:KainosSoftwareLtd/KainosStudio-CoreInfra:pull_request",
-        "repo:KainosSoftwareLtd/KainosStudio-CoreInfra:ref:refs/heads/main",
-        "repo:KainosSoftwareLtd/KainosStudio-CoreApp:pull_request",
-        "repo:KainosSoftwareLtd/KainosStudio-CoreApp:ref:refs/heads/main",
-        "repo:KainosSoftwareLtd/KainosStudio-CoreInfra:environment:Dev",
-        "repo:KainosSoftwareLtd/KainosStudio-CoreInfra:environment:Pipeline",
-        "repo:KainosSoftwareLtd/KainosStudio-CoreInfra:environment:Staging",
-        "repo:KainosSoftwareLtd/KainosStudio-CoreApp:environment:Dev",
-        "repo:KainosSoftwareLtd/KainosStudio-CoreApp:environment:Staging",
+        "repo:KainosSoftwareLtd/KainosStudio-CoreInfra-Public:pull_request",
+        "repo:KainosSoftwareLtd/KainosStudio-CoreInfra-Public:ref:refs/heads/main",
+        "repo:KainosSoftwareLtd/KainosStudio-CoreApp-Public:pull_request",
+        "repo:KainosSoftwareLtd/KainosStudio-CoreApp-Public:ref:refs/heads/main",
+        "repo:KainosSoftwareLtd/KainosStudio-CoreInfra-Public:environment:Dev",
+        "repo:KainosSoftwareLtd/KainosStudio-CoreInfra-Public:environment:Pipeline",
+        "repo:KainosSoftwareLtd/KainosStudio-CoreInfra-Public:environment:Staging",
+        "repo:KainosSoftwareLtd/KainosStudio-CoreApp-Public:environment:Dev",
+        "repo:KainosSoftwareLtd/KainosStudio-CoreApp-Public:environment:Staging",
       ]
     }
 
