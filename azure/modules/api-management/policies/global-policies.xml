@@ -1,0 +1,166 @@
+<policies>
+    <inbound>
+        <!-- CORS Policy for all APIs -->
+        <cors allow-credentials="true">
+            <allowed-origins>
+                <origin>*</origin>
+            </allowed-origins>
+            <allowed-methods>
+                <method>GET</method>
+                <method>POST</method>
+                <method>PUT</method>
+                <method>DELETE</method>
+                <method>PATCH</method>
+                <method>OPTIONS</method>
+                <method>HEAD</method>
+            </allowed-methods>
+            <allowed-headers>
+                <header>*</header>
+            </allowed-headers>
+            <expose-headers>
+                <header>*</header>
+            </expose-headers>
+        </cors>
+        
+        <!-- Security Headers -->
+        <set-header name="X-Content-Type-Options" exists-action="override">
+            <value>nosniff</value>
+        </set-header>
+        <set-header name="X-Frame-Options" exists-action="override">
+            <value>DENY</value>
+        </set-header>
+        <set-header name="X-XSS-Protection" exists-action="override">
+            <value>1; mode=block</value>
+        </set-header>
+        <set-header name="Strict-Transport-Security" exists-action="override">
+            <value>max-age=31536000; includeSubDomains</value>
+        </set-header>
+        <set-header name="Referrer-Policy" exists-action="override">
+            <value>strict-origin-when-cross-origin</value>
+        </set-header>
+        
+        <!-- Forward Client IP -->
+        <set-header name="X-Forwarded-For" exists-action="override">
+            <value>@(context.Request.IpAddress)</value>
+        </set-header>
+        <set-header name="X-Real-IP" exists-action="override">
+            <value>@(context.Request.IpAddress)</value>
+        </set-header>
+        
+        <!-- Request ID for tracking -->
+        <set-header name="X-Request-ID" exists-action="override">
+            <value>@(Guid.NewGuid().ToString())</value>
+        </set-header>
+        
+        <!-- Rate limiting (optional - can be overridden at API level) -->
+        <rate-limit calls="1000" renewal-period="3600" />
+        
+        <!-- Basic request validation -->
+        <validate-content unspecified-content-type-action="prevent" max-size="1048576" size-exceeded-action="prevent" errors-variable-name="requestValidationErrors" />
+        
+        <!-- Log inbound request -->
+        <log-to-eventhub logger-id="@(context.Deployment.ServiceName + "-logger")">
+            @{
+                return new JObject(
+                    new JProperty("timestamp", DateTime.UtcNow.ToString()),
+                    new JProperty("requestId", context.RequestId),
+                    new JProperty("method", context.Request.Method),
+                    new JProperty("url", context.Request.Url.ToString()),
+                    new JProperty("clientIP", context.Request.IpAddress),
+                    new JProperty("userAgent", context.Request.Headers.GetValueOrDefault("User-Agent", "")),
+                    new JProperty("stage", "inbound")
+                ).ToString();
+            }
+        </log-to-eventhub>
+    </inbound>
+    
+    <backend>
+        <!-- Global backend processing -->
+        <forward-request timeout="60" />
+    </backend>
+    
+    <outbound>
+        <!-- Remove server identification headers for security -->
+        <set-header name="Server" exists-action="delete" />
+        <set-header name="X-Powered-By" exists-action="delete" />
+        <set-header name="X-AspNet-Version" exists-action="delete" />
+        <set-header name="X-AspNetMvc-Version" exists-action="delete" />
+        
+        <!-- Add response headers -->
+        <set-header name="X-Response-Time" exists-action="override">
+            <value>@(context.Response.Headers.GetValueOrDefault("X-Response-Time", ((TimeSpan)(DateTime.UtcNow - context.Variables.GetValueOrDefault<DateTime>("startTime", DateTime.UtcNow))).TotalMilliseconds.ToString() + "ms"))</value>
+        </set-header>
+        
+        <!-- Cache control headers -->
+        <set-header name="Cache-Control" exists-action="skip">
+            <value>no-cache, no-store, must-revalidate</value>
+        </set-header>
+        <set-header name="Pragma" exists-action="skip">
+            <value>no-cache</value>
+        </set-header>
+        <set-header name="Expires" exists-action="skip">
+            <value>0</value>
+        </set-header>
+        
+        <!-- Log outbound response -->
+        <log-to-eventhub logger-id="@(context.Deployment.ServiceName + "-logger")">
+            @{
+                return new JObject(
+                    new JProperty("timestamp", DateTime.UtcNow.ToString()),
+                    new JProperty("requestId", context.RequestId),
+                    new JProperty("responseStatus", context.Response.StatusCode),
+                    new JProperty("responseTime", ((TimeSpan)(DateTime.UtcNow - context.Variables.GetValueOrDefault<DateTime>("startTime", DateTime.UtcNow))).TotalMilliseconds),
+                    new JProperty("stage", "outbound")
+                ).ToString();
+            }
+        </log-to-eventhub>
+    </outbound>
+    
+    <on-error>
+        <!-- Global error handling -->
+        <set-status code="@(context.LastError.Source == "configuration" ? 500 : context.Response.StatusCode)" reason="@(context.LastError.Source == "configuration" ? "Internal Server Error" : context.Response.StatusReason)" />
+        
+        <!-- Log error -->
+        <log-to-eventhub logger-id="@(context.Deployment.ServiceName + "-logger")">
+            @{
+                return new JObject(
+                    new JProperty("timestamp", DateTime.UtcNow.ToString()),
+                    new JProperty("requestId", context.RequestId),
+                    new JProperty("error", context.LastError.Message),
+                    new JProperty("source", context.LastError.Source),
+                    new JProperty("section", context.LastError.Section),
+                    new JProperty("reason", context.LastError.Reason),
+                    new JProperty("stage", "error")
+                ).ToString();
+            }
+        </log-to-eventhub>
+        
+        <!-- Return structured error response -->
+        <set-header name="Content-Type" exists-action="override">
+            <value>application/json</value>
+        </set-header>
+        <set-body>@{
+            var error = context.LastError;
+            var response = new JObject();
+            
+            response["error"] = new JObject();
+            response["error"]["code"] = context.Response.StatusCode;
+            response["error"]["message"] = error.Source == "configuration" ? "Internal Server Error" : error.Message;
+            response["error"]["requestId"] = context.RequestId;
+            response["error"]["timestamp"] = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+            
+            // Don't expose internal error details in production
+            if (context.Deployment.ServiceName.Contains("dev") || context.Deployment.ServiceName.Contains("staging"))
+            {
+                response["error"]["details"] = new JObject()
+                {
+                    ["source"] = error.Source,
+                    ["section"] = error.Section,
+                    ["reason"] = error.Reason
+                };
+            }
+            
+            return response.ToString();
+        }</set-body>
+    </on-error>
+</policies>

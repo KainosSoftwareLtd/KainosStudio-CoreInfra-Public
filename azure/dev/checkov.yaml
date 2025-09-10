@@ -1,0 +1,34 @@
+framework:
+  - terraform
+
+check:
+  - CKV_AZURE_1   # Ensure that Storage Account access tier is set to Cool
+  - CKV_AZURE_2   # Ensure that storage account does not allow public read access to all services
+  - CKV_AZURE_3   # Ensure that storage account requires "https_only"
+  - CKV_AZURE_33  # Ensure Storage logging is enabled for Queue service for read, write and delete requests
+  - CKV_AZURE_35  # Ensure default network access rule for Storage Accounts is set to deny
+  - CKV_AZURE_36  # Ensure that Storage Account access tier is set to Cool
+  - CKV_AZURE_37  # Ensure that storage account uses the latest version of TLS encryption
+  - CKV_AZURE_43  # Ensure Storage Accounts adhere to the naming rules
+  - CKV_AZURE_44  # Ensure Storage Account is using the latest version of TLS encryption
+  - CKV_AZURE_59  # Ensure that Storage accounts disallow public blob access
+  - CKV_AZURE_190 # Ensure that Storage blobs restrict public access
+  - CKV_AZURE_206 # Ensure that Storage Accounts use replication
+  - CKV2_AZURE_1  # Ensure storage for critical data are encrypted with Customer Managed Key
+  - CKV2_AZURE_18 # Ensure that Storage Accounts use customer-managed key for encryption
+  - CKV2_AZURE_33 # Ensure storage account is configured with private endpoint
+
+skip_check:
+  - CKV_AZURE_13  # App Service Authentication is not required for development
+  - CKV_AZURE_14  # App Service HTTP 2.0 is not critical
+  - CKV_AZURE_15  # App Service TLS 1.2 - will be enforced separately
+  - CKV_AZURE_16  # Function App HTTP 2.0 is not critical
+  - CKV_AZURE_17  # Function App Authentication is not required for development
+  - CKV_AZURE_56  # Function App managed identity - implemented via Terraform
+  - CKV_AZURE_70  # Function App HTTPS only - implemented via Terraform
+  - CKV_AZURE_89  # Redis Cache authentication - not using Redis in this setup
+  - CKV_AZURE_133 # CosmosDB disable local auth - using connection strings for simplicity
+  - CKV_AZURE_134 # CosmosDB authentication - using connection strings for development
+  - CKV2_AZURE_32 # Key Vault private endpoint - not required for development
+
+soft_fail: true

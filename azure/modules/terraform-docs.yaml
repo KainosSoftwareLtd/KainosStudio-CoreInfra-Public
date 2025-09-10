@@ -1,0 +1,18 @@
+formatter: markdown table
+version: "v0.20.0"
+
+sections:
+  show: ["all"]
+
+sort:
+  enabled: true
+  by: name
+
+settings:
+  anchor: true
+  color: true
+  default: true
+  description: true
+  required: true
+  sensitive: true
+  type: true

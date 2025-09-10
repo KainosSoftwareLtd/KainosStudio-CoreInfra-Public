@@ -1,0 +1,99 @@
+name: Kainos Core PR Validation
+
+on:
+  pull_request:
+
+permissions:
+  id-token: write 
+  contents: read 
+
+jobs:
+  aws-validation:
+    name: AWS PR Validation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: aws/non-prod-infra
+    strategy:
+      fail-fast: false
+      matrix:
+        env: [pipeline, dev, staging]
+        include:
+          - env: pipeline
+            display-name: Pipeline
+          - env: dev
+            display-name: Dev
+          - env: staging
+            display-name: Staging
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::975050265283:role/GHA-CodeBuild-Service-Role
+          aws-region: eu-west-2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Checkov
+        run: pip3 install checkov==3.2.365
+
+      - name: Initialize Terraform
+        run: ./run.sh ${{ matrix.env }} init
+
+      - name: Run Terraform validation and checkov
+        run: make check ${{ matrix.env }}
+
+      - name: Run Terraform plan
+        id: plan
+        run: make plan ${{ matrix.env }}
+  
+  roles-plan:
+    name: Roles Plan
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: aws/non-prod-infra
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::975050265283:role/GHA_Role_Creator_Role
+          aws-region: eu-west-2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Checkov
+        run: pip3 install checkov==3.2.365
+
+      - name: Initialize Terraform (roles)
+        run: ./run.sh roles init
+
+      - name: Run Terraform validation and checkov (roles)
+        run: make check roles
+
+      - name: Run Terraform plan (roles)
+        id: plan
+        run: make plan roles             

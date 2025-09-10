@@ -1,0 +1,4 @@
+A versatile and reusable Terraform module for provisioning and managing AWS S3 buckets with advanced configurations. 
+This module allows you to create S3 buckets tailored to your specific needs by enabling optional features such as 
+versioning, server access logging, server-side encryption with AWS KMS, public access blocking, and automated file uploads. 
+Whether you're setting up a simple storage solution or a complex, secure data repository, this module provides the flexibility and control required to streamline your infrastructure as code workflows.

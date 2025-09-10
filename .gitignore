@@ -1,0 +1,51 @@
+# Local Terraform state
+*.tfstate
+*.tfstate.*
+
+# Crash logs
+crash.log
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Lock files
+.terraform.lock.hcl
+
+# Provider dependency directory
+.terraform/
+
+# Sensitive files
+secret.tfvars
+*.secret.tfvars
+secrets.tf
+secrets.tfvars
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Ignore Terraform plan output files
+*.tfplan
+
+# Ignore generated files from Terraform commands
+.terraformrc
+.terraform.d/
+
+.DS_Store
+
+# Remove Zip files
+*.zip
+
+# Certificate files
+*.pfx
+*.p12
+*.pem
+*.key
+*.crt
+
+# Azure CLI credentials
+.azure/

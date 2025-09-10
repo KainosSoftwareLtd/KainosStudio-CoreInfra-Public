@@ -1,0 +1,32 @@
+# Checkov configuration for Azure Terraform
+framework:
+  - terraform
+
+# Skip checks that are not applicable for development environments
+skip-check:
+  # Storage account checks that may be too restrictive for dev
+  - CKV_AZURE_33   # Storage account should use latest TLS version (handled in code)
+  - CKV_AZURE_44   # Storage account should use private link (not needed for dev)
+  - CKV_AZURE_59   # Storage account should disable public access (not needed for dev)
+
+  # Key Vault checks that may conflict with development needs
+  - CKV_AZURE_42   # Key Vault should have purge protection (disabled for dev)
+  - CKV_AZURE_110  # Key Vault should have firewall enabled (not needed for dev)
+
+  # Function App checks that may be too restrictive
+  - CKV_AZURE_56   # Function app should use latest runtime version (handled in code)
+  - CKV_AZURE_67   # Function app should use managed identity (handled in code)
+
+  # API Management checks
+  - CKV_AZURE_173  # API Management should use virtual network (not needed for dev)
+  - CKV_AZURE_174  # API Management should use custom domain with SSL (not needed for dev)
+
+  # Cosmos DB checks
+  - CKV_AZURE_140  # Cosmos DB should have local auth disabled (not practical for dev)
+  - CKV_AZURE_101  # Cosmos DB should have firewall enabled (not needed for dev)
+
+# Severity settings
+soft-fail: false
+hard-fail-on:
+  - HIGH
+  - CRITICAL

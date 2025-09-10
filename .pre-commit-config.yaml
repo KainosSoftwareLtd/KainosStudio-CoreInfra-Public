@@ -1,0 +1,169 @@
+default_stages: [pre-commit]
+repos:
+  - repo: https://github.com/gruntwork-io/pre-commit
+    rev: v0.1.30
+    hooks:
+      - id: terraform-fmt
+        args: ["aws", "azure"]
+        files: \.(tf|tfvars)$
+
+  - repo: https://github.com/bridgecrewio/checkov.git
+    rev: '3.2.470'
+    hooks:
+      - id: checkov
+        name: checkov-aws
+        entry: checkov --config-file aws/non-prod-infra/checkov.yaml --framework terraform -d aws --quiet --compact
+        language: system
+        files: ^aws/.*\.(tf|tfvars)$
+        pass_filenames: false
+
+      - id: checkov
+        name: checkov-azure
+        entry: checkov --config-file azure/checkov.yaml --framework terraform -d azure --quiet --compact
+        language: system
+        files: ^azure/.*\.(tf|tfvars)$
+        pass_filenames: false
+
+  - repo: https://github.com/terraform-docs/terraform-docs
+    rev: "v0.20.0"
+    hooks:
+      - id: terraform-docs-go
+        name: terraform-docs-aws-pipeline
+        args: [
+          "markdown",
+          "table",
+          "--output-file",
+          "README.md",
+          "./aws/pipeline"
+        ]
+        files: ^aws/pipeline/.*\.tf$
+
+      - id: terraform-docs-go
+        name: terraform-docs-aws-roles
+        args: [
+          "markdown",
+          "table",
+          "--output-file",
+          "README.md",
+          "./aws/roles"
+        ]
+        files: ^aws/roles/.*\.tf$
+
+      - id: terraform-docs-go
+        name: terraform-docs-aws-dev
+        args: [
+          "markdown",
+          "table",
+          "--output-file",
+          "README.md",
+          "./aws/dev"
+        ]
+        files: ^aws/dev/.*\.tf$
+
+      - id: terraform-docs-go
+        name: terraform-docs-aws-staging
+        args: [
+          "markdown",
+          "table",
+          "--output-file",
+          "README.md",
+          "./aws/staging"
+        ]
+        files: ^aws/staging/.*\.tf$
+
+      - id: terraform-docs-go
+        name: terraform-docs-aws-prod
+        args: [
+          "markdown",
+          "table",
+          "--output-file",
+          "README.md",
+          "./aws/prod"
+        ]
+        files: ^aws/prod/.*\.tf$
+
+  - repo: https://github.com/terraform-docs/terraform-docs
+    rev: "v0.20.0"
+    hooks:
+      - id: terraform-docs-go
+        name: terraform-docs-aws-modules
+        args: [
+          "markdown",
+          "table",
+          "--output-file",
+          "README.md",
+          "./aws/modules"
+        ]
+        files: ^aws/modules/.*\.tf$
+
+  - repo: https://github.com/terraform-docs/terraform-docs
+    rev: "v0.20.0"
+    hooks:
+      - id: terraform-docs-go
+        name: terraform-docs-azure-global
+        args: [
+          "markdown",
+          "table",
+          "--output-file",
+          "README.md",
+          "./azure/global"
+        ]
+        files: ^azure/global/.*\.tf$
+
+      - id: terraform-docs-go
+        name: terraform-docs-azure-rbac
+        args: [
+          "markdown",
+          "table",
+          "--output-file",
+          "README.md",
+          "./azure/rbac"
+        ]
+        files: ^azure/rbac/.*\.tf$
+
+      - id: terraform-docs-go
+        name: terraform-docs-azure-dev
+        args: [
+          "markdown",
+          "table",
+          "--output-file",
+          "README.md",
+          "./azure/dev"
+        ]
+        files: ^azure/dev/.*\.tf$
+
+      - id: terraform-docs-go
+        name: terraform-docs-azure-staging
+        args: [
+          "markdown",
+          "table",
+          "--output-file",
+          "README.md",
+          "./azure/staging"
+        ]
+        files: ^azure/staging/.*\.tf$
+
+      - id: terraform-docs-go
+        name: terraform-docs-azure-prod
+        args: [
+          "markdown",
+          "table",
+          "--output-file",
+          "README.md",
+          "./azure/prod"
+        ]
+        files: ^azure/prod/.*\.tf$
+
+  - repo: https://github.com/terraform-docs/terraform-docs
+    rev: "v0.20.0"
+    hooks:
+      - id: terraform-docs-go
+        name: terraform-docs-azure-modules
+        args: [
+          "markdown",
+          "table",
+          "--output-file",
+          "README.md",
+          "./azure/modules"
+        ]
+        files: ^azure/modules/.*\.tf$

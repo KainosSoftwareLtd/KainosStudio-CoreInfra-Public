@@ -1,0 +1,61 @@
+<policies>
+    <inbound>
+        <base />
+        <!-- Set backend service URL to KFD Delete Function -->
+        <set-backend-service base-url="${kfd_delete_function_url}" />
+        
+        <!-- Extract the file ID from the URL path -->
+        <set-variable name="fileId" value="@(context.Request.MatchedParameters["id"])" />
+        
+        <!-- Forward all headers from the request -->
+        <set-header name="x-functions-key" exists-action="skip">
+            <value>${kfd_delete_function_key}</value>
+        </set-header>
+        
+        <!-- Pass the file ID as a query parameter or header to the function -->
+        <set-query-parameter name="id" exists-action="override">
+            <value>@((string)context.Variables["fileId"])</value>
+        </set-query-parameter>
+        
+        <!-- CORS policy for delete operations -->
+        <cors allow-credentials="true">
+            <allowed-origins>
+                <origin>*</origin>
+            </allowed-origins>
+            <allowed-methods>
+                <method>DELETE</method>
+                <method>OPTIONS</method>
+            </allowed-methods>
+            <allowed-headers>
+                <header>*</header>
+            </allowed-headers>
+        </cors>
+        
+        <!-- Rewrite URL to remove the ID from path (since it's passed as query param) -->
+        <rewrite-uri template="/" />
+    </inbound>
+    <backend>
+        <base />
+    </backend>
+    <outbound>
+        <base />
+        <!-- Set appropriate response headers -->
+        <set-header name="Content-Type" exists-action="override">
+            <value>application/json</value>
+        </set-header>
+    </outbound>
+    <on-error>
+        <base />
+        <!-- Error handling for delete operations -->
+        <choose>
+            <when condition="@(context.Response.StatusCode == 404)">
+                <set-status code="404" reason="File not found" />
+                <set-body>{"error": "File not found", "id": "@((string)context.Variables["fileId"])"}</set-body>
+            </when>
+            <otherwise>
+                <set-status code="500" reason="Delete operation failed" />
+                <set-body>{"error": "File deletion failed", "message": "@(context.LastError.Message)"}</set-body>
+            </otherwise>
+        </choose>
+    </on-error>
+</policies>

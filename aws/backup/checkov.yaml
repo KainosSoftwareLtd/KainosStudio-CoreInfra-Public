@@ -1,0 +1,24 @@
+# Checkov configuration for AWS Terraform
+framework:
+  - terraform
+
+skip-check: 
+  - CKV2_AWS_61 
+  - CKV2_AWS_62 
+  - CKV_AWS_144
+  - CKV2_AWS_65 # Need to skip this check as it is needed by cloudfront
+  - CKV_AWS_111 # There is no write permission and it has a condition to check
+  - CKV_AWS_356 # Public access required for specific use case 
+  - CKV2_AWS_34 # Encryption not required for normal Parameter Store variables
+  - CKV_AWS_219 # Codepipeline is using AWS Managed KMS  and This is LOW severity and not required for this use case
+  - CKV_AWS_316 # I need Previlege access in this case to codebuild the application, This might be looked into later
+  - CKV_AWS_147 # Codebuild Encryption is not required right now but a technical debt that might be addressed later 
+  - CKV2_AWS_31 # WAF Logging is not required for this use case, This might be configured later.
+  # The following checks are skipped because they are applicable for Local API Gateway and 
+  - CKV_AWS_59
+  - CKV_AWS_120
+  - CKV_AWS_225
+  - CKV2_AWS_51
+  - CKV2_AWS_29
+  - CKV2_AWS_53 # Logs do not need to be stored for 1year
+  - CKV_AWS_338 # Logs do not need to be stored for 1year

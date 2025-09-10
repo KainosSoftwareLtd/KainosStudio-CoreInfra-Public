@@ -1,0 +1,58 @@
+<policies>
+    <inbound>
+        <base />
+        <!-- Set backend service URL to KFD Upload Function -->
+        <set-backend-service base-url="${kfd_upload_function_url}" />
+        
+        <!-- Forward all headers from the request -->
+        <set-header name="x-functions-key" exists-action="skip">
+            <value>${kfd_upload_function_key}</value>
+        </set-header>
+        
+        <!-- CORS policy for upload operations -->
+        <cors allow-credentials="true">
+            <allowed-origins>
+                <origin>*</origin>
+            </allowed-origins>
+            <allowed-methods>
+                <method>PUT</method>
+                <method>POST</method>
+                <method>OPTIONS</method>
+            </allowed-methods>
+            <allowed-headers>
+                <header>*</header>
+            </allowed-headers>
+        </cors>
+        
+        <!-- Transform PUT to POST and route to upload endpoint -->
+        <set-method>POST</set-method>
+        <rewrite-uri template="/upload" />
+        
+        <!-- Preserve the request body for upload -->
+        <set-body>@(context.Request.Body.As<string>(preserveContent: true))</set-body>
+    </inbound>
+    <backend>
+        <base />
+    </backend>
+    <outbound>
+        <base />
+        <!-- Set appropriate response headers -->
+        <set-header name="Content-Type" exists-action="override">
+            <value>application/json</value>
+        </set-header>
+    </outbound>
+    <on-error>
+        <base />
+        <!-- Error handling for upload operations -->
+        <choose>
+            <when condition="@(context.Response.StatusCode == 413)">
+                <set-status code="413" reason="File too large" />
+                <set-body>{"error": "File too large", "message": "Maximum file size exceeded"}</set-body>
+            </when>
+            <otherwise>
+                <set-status code="500" reason="Upload failed" />
+                <set-body>{"error": "File upload failed", "message": "@(context.LastError.Message)"}</set-body>
+            </otherwise>
+        </choose>
+    </on-error>
+</policies>

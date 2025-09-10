@@ -1,0 +1,76 @@
+name: Kainos Core AWS Production Deployment 
+
+on:
+  workflow_dispatch:
+    inputs:
+      Apply:
+        description: 'Apply Terraform changes'
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  id-token: write 
+  contents: read 
+
+defaults:
+  run:
+    working-directory: aws/prod
+
+jobs:
+  plan:
+    name: Production Plan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::696793786584:role/GHA-OIDC-Role
+          aws-region: eu-west-2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: Initialize Terraform
+        run: ./run.sh prod init
+
+      - name: Run Terraform validation and checkov
+        run: make check prod
+
+      - name: Run Terraform plan
+        id: plan
+        run: ./run.sh prod plan
+
+  apply:
+    name: Production Apply
+    needs: plan
+    if: ${{ github.event.inputs.Apply == 'true' }}
+    runs-on: ubuntu-latest
+    environment: Production
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::696793786584:role/GHA-OIDC-Role
+          aws-region: eu-west-2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: Initialize Terraform
+        run: ./run.sh prod init
+
+      - name: Run Terraform apply
+        run: ./run.sh prod apply
