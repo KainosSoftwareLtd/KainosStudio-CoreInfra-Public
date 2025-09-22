@@ -1,4 +1,4 @@
 resource "aws_codestarconnections_connection" "kainosstudio" {
-  name          = "KainosStudio"
+  name          = "KainosStudioProd"
   provider_type = "GitHub"
 }
