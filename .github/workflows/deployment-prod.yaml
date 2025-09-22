@@ -45,7 +45,7 @@ jobs:
 
       - name: Run Terraform plan
         id: plan
-        run: ./run.sh prod plan
+        run: make prod plan
 
   apply:
     name: Production Apply
@@ -67,10 +67,10 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.9.8
+          terraform_version: 1.10.4
 
       - name: Initialize Terraform
         run: ./run.sh prod init
 
       - name: Run Terraform apply
-        run: ./run.sh prod apply
+        run: make prod apply
