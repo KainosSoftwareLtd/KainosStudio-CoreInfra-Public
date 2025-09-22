@@ -31,7 +31,7 @@ resource "aws_ssm_parameter" "s3_app_kfd_files" {
 resource "aws_ssm_parameter" "s3_app_static_files" {
   name  = "/s3/kcappstaticfiles"
   type  = "String"
-  value = "kainoscore-static-files"
+  value = "kainoscore-staticfiles"
 }
 
 resource "aws_ssm_parameter" "s3_app_zip_files" {
