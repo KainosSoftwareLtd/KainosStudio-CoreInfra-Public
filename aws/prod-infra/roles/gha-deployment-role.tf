@@ -48,11 +48,10 @@ data "aws_iam_policy_document" "codebuild_assume_role_policy" {
         "repo:KainosSoftwareLtd/KainosStudio-CoreInfra-Public:ref:refs/heads/main",
         "repo:KainosSoftwareLtd/KainosStudio-CoreApp-Public:pull_request",
         "repo:KainosSoftwareLtd/KainosStudio-CoreApp-Public:ref:refs/heads/main",
-        "repo:KainosSoftwareLtd/KainosStudio-CoreInfra-Public:environment:Dev",
-        "repo:KainosSoftwareLtd/KainosStudio-CoreInfra-Public:environment:Pipeline",
-        "repo:KainosSoftwareLtd/KainosStudio-CoreInfra-Public:environment:Staging",
-        "repo:KainosSoftwareLtd/KainosStudio-CoreApp-Public:environment:Dev",
-        "repo:KainosSoftwareLtd/KainosStudio-CoreApp-Public:environment:Staging",
+        "repo:KainosSoftwareLtd/KainosStudio-CoreInfra-Public:environment:Prod",
+        "repo:KainosSoftwareLtd/KainosStudio-CoreInfra-Public:environment:Global",
+        "repo:KainosSoftwareLtd/KainosStudio-CoreInfra-Public:environment:Roles",
+        "repo:KainosSoftwareLtd/KainosStudio-CoreApp-Public:environment:Prod",
       ]
     }
 
