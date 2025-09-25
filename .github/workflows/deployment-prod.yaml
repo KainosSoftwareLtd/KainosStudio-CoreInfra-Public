@@ -29,7 +29,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::696793786584:role/GHA-OIDC-Role
+          role-to-assume: arn:aws:iam::696793786584:role/GHA-CodeBuild-Service-Role
           aws-region: eu-west-2
 
       - name: Setup Terraform
@@ -61,7 +61,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::696793786584:role/GHA-OIDC-Role
+          role-to-assume: arn:aws:iam::696793786584:role/GHA-CodeBuild-Service-Role
           aws-region: eu-west-2
 
       - name: Setup Terraform
