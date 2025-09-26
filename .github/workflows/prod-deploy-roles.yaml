@@ -1,4 +1,4 @@
-name: Kainos Core AWS Global Deployment - Prod
+name: Kainos Core AWS Roles Deployment
 
 on:
   workflow_dispatch:
@@ -19,7 +19,7 @@ defaults:
 
 jobs:
   plan:
-    name: Global Plan
+    name: Roles Plan
     runs-on: ubuntu-latest
 
     steps:
@@ -29,7 +29,7 @@ jobs:
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::696793786584:role/GHA-CodeBuild-Service-Role
+          role-to-assume: arn:aws:iam::696793786584:role/GHA_Role_Creator_Role
           aws-region: eu-west-2
 
       - name: Setup Terraform
@@ -45,22 +45,22 @@ jobs:
       - name: Install Checkov
         run: pip3 install checkov==3.2.365
 
-      - name: Initialize Terraform (global)
-        run: ./run.sh global init
+      - name: Initialize Terraform (roles)
+        run: ./run.sh roles init
 
-      - name: Run Terraform validation and checkov (global)
-        run: make check global
+      - name: Run Terraform validation and checkov (roles)
+        run: make check roles
 
-      - name: Run Terraform plan (global)
+      - name: Run Terraform plan (roles)
         id: plan
-        run: make plan global
+        run: make plan roles
 
   apply:
-    name: Global Apply
+    name: Roles Apply
     needs: plan
     if: ${{ github.event.inputs.Apply == 'true' }}
     runs-on: ubuntu-latest
-    environment: Global
+    environment: Roles
 
     steps:
       - name: Checkout Repository
@@ -69,7 +69,7 @@ jobs:
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::696793786584:role/GHA-CodeBuild-Service-Role
+          role-to-assume: arn:aws:iam::696793786584:role/GHA_Role_Creator_Role
           aws-region: eu-west-2
 
       - name: Setup Terraform
@@ -77,11 +77,11 @@ jobs:
         with:
           terraform_version: 1.10.4
 
-      - name: Initialize Terraform (global)
-        run: ./run.sh global init
+      - name: Initialize Terraform (roles)
+        run: ./run.sh roles init
       
-      - name: Run Terraform Plan (global)
-        run: make plan global   
+      - name: Run Terraform Plan (roles)
+        run: make plan roles   
 
-      - name: Run Terraform apply (global)
-        run: make apply global
+      - name: Run Terraform apply (roles)
+        run: make apply roles
