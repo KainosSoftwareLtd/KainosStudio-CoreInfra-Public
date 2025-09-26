@@ -52,7 +52,7 @@ data "aws_iam_policy_document" "codebuild_assume_role_policy" {
         "repo:KainosSoftwareLtd/KainosStudio-CoreInfra-Public:environment:Global",
         "repo:KainosSoftwareLtd/KainosStudio-CoreInfra-Public:environment:Roles",
         "repo:KainosSoftwareLtd/KainosStudio-CoreApp-Public:environment:Prod",
-        "repo:KainosStudio-CoreInfra-Public:environment:Production"
+        "repo:KainosStudio-CoreInfra-Public:environment:Prod"
       ]
     }
 
