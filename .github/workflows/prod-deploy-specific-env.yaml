@@ -1,4 +1,4 @@
-name: Kainos Core AWS Production Deployment - Specific Environment
+name: Kainos Core AWS Prod Specific Deployment 
 
 on:
   workflow_dispatch:
