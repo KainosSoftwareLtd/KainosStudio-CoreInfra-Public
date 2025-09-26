@@ -9,7 +9,6 @@ on:
         type: choice
         options:
           - global
-          - roles
           - prod
       Apply:
         description: 'Apply Terraform changes'
@@ -68,7 +67,7 @@ jobs:
     needs: plan
     if: ${{ github.event.inputs.Apply == 'true' }}
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment == 'global' && 'Global' || inputs.environment == 'roles' && 'Roles' || inputs.environment == 'prod' && 'Prod' }}
+    environment: ${{ inputs.environment == 'global' && 'Global' || inputs.environment == 'prod' && 'Prod' }}
     
     steps:
       - name: Checkout Repository
