@@ -1,4 +1,4 @@
-name: Non-Prod AWS Deployment 
+name: Prod AWS Deployment 
 
 on:
   workflow_dispatch:
@@ -15,7 +15,7 @@ permissions:
 
 defaults:
   run:
-    working-directory: aws/non-prod-infra
+    working-directory: aws/prod-infra
 
 jobs:
   plan:
@@ -24,14 +24,12 @@ jobs:
     strategy:
       fail-fast: false  
       matrix:
-        env: [pipeline, dev, staging]
+        env: [global, prod]
         include:
-          - env: pipeline
-            display-name: Pipeline
-          - env: dev
-            display-name: Dev
-          - env: staging
-            display-name: Staging
+          - env: global
+            display-name: Global
+          - env: prod
+            display-name: Production
     
     steps:
       - name: Checkout Repository
@@ -40,18 +38,13 @@ jobs:
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::975050265283:role/GHA-CodeBuild-Service-Role
+          role-to-assume: arn:aws:iam::696793786584:role/GHA-CodeBuild-Service-Role
           aws-region: eu-west-2
           
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.10.4
-          
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
           
       - name: Install Checkov
         run: pip3 install checkov==3.2.365
@@ -75,17 +68,14 @@ jobs:
     strategy:
       fail-fast: false  
       matrix:
-        env: [pipeline, dev, staging]
+        env: [global, prod]
         include:
-          - env: pipeline
-            display-name: Pipeline
-            github-environment: Pipeline
-          - env: dev
-            display-name: Dev
-            github-environment: Dev
-          - env: staging
-            display-name: Staging
-            github-environment: Staging
+          - env: global
+            display-name: Global
+            github-environment: Global
+          - env: prod
+            display-name: Production
+            github-environment: Prod
     
     steps:
       - name: Checkout Repository
@@ -94,7 +84,7 @@ jobs:
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::975050265283:role/GHA-CodeBuild-Service-Role
+          role-to-assume: arn:aws:iam::696793786584:role/GHA-CodeBuild-Service-Role
           aws-region: eu-west-2
           
       - name: Setup Terraform
@@ -106,7 +96,7 @@ jobs:
         run: ./run.sh ${{ matrix.env }} init
         
       - name: Run Terraform plan
-        run: make apply ${{ matrix.env }}
+        run: make plan ${{ matrix.env }}
         
       - name: Run Terraform apply
         run: make apply ${{ matrix.env }}

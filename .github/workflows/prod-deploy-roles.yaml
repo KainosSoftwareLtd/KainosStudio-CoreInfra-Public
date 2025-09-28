@@ -1,4 +1,4 @@
-name: Non-Prod AWS Roles Deployment
+name: Prod AWS Roles Deployment
 
 on:
   workflow_dispatch:
@@ -15,7 +15,7 @@ permissions:
 
 defaults:
   run:
-    working-directory: aws/non-prod-infra
+    working-directory: aws/prod-infra
 
 jobs:
   plan:
@@ -29,18 +29,13 @@ jobs:
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::975050265283:role/GHA_Role_Creator_Role
+          role-to-assume: arn:aws:iam::696793786584:role/GHA_Role_Creator_Role
           aws-region: eu-west-2
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.10.4
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
 
       - name: Install Checkov
         run: pip3 install checkov==3.2.365
@@ -69,7 +64,7 @@ jobs:
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::975050265283:role/GHA_Role_Creator_Role
+          role-to-assume: arn:aws:iam::696793786584:role/GHA_Role_Creator_Role
           aws-region: eu-west-2
 
       - name: Setup Terraform

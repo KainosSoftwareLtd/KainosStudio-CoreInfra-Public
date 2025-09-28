@@ -8,7 +8,7 @@ repos:
         files: \.(tf|tfvars)$
 
   - repo: https://github.com/bridgecrewio/checkov.git
-    rev: '3.2.471'
+    rev: '3.2.472'
     hooks:
       - id: checkov
         name: checkov-aws

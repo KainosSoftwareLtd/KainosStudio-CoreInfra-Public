@@ -1,8 +1,15 @@
-name: Non-Prod AWS Deployment 
+name: Prod AWS Deployment - Specific Environment
 
 on:
   workflow_dispatch:
     inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - global
+          - prod
       Apply:
         description: 'Apply Terraform changes'
         required: true
@@ -15,23 +22,12 @@ permissions:
 
 defaults:
   run:
-    working-directory: aws/non-prod-infra
+    working-directory: aws/prod-infra
 
 jobs:
   plan:
-    name: ${{ matrix.env }} Plan
+    name: Plan - ${{ inputs.environment }}
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false  
-      matrix:
-        env: [pipeline, dev, staging]
-        include:
-          - env: pipeline
-            display-name: Pipeline
-          - env: dev
-            display-name: Dev
-          - env: staging
-            display-name: Staging
     
     steps:
       - name: Checkout Repository
@@ -40,52 +36,33 @@ jobs:
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::975050265283:role/GHA-CodeBuild-Service-Role
+          role-to-assume: arn:aws:iam::696793786584:role/GHA-CodeBuild-Service-Role
           aws-region: eu-west-2
           
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.10.4
-          
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-          
+        
       - name: Install Checkov
         run: pip3 install checkov==3.2.365
         
       - name: Initialize Terraform
-        run: ./run.sh ${{ matrix.env }} init
+        run: ./run.sh ${{ inputs.environment }} init
         
       - name: Run Terraform validation and checkov
-        run: make check ${{ matrix.env }}
+        run: make check ${{ inputs.environment }}
         
       - name: Run Terraform plan
         id: plan
-        run: make plan ${{ matrix.env }}
+        run: make plan ${{ inputs.environment }}
   
   apply:
-    name: ${{ matrix.env }} Apply
+    name: Apply - ${{ inputs.environment }}
     needs: plan
     if: ${{ github.event.inputs.Apply == 'true' }}
     runs-on: ubuntu-latest
-    environment: ${{ matrix.github-environment }}
-    strategy:
-      fail-fast: false  
-      matrix:
-        env: [pipeline, dev, staging]
-        include:
-          - env: pipeline
-            display-name: Pipeline
-            github-environment: Pipeline
-          - env: dev
-            display-name: Dev
-            github-environment: Dev
-          - env: staging
-            display-name: Staging
-            github-environment: Staging
+    environment: ${{ inputs.environment == 'global' && 'Global' || inputs.environment == 'prod' && 'Prod' }}
     
     steps:
       - name: Checkout Repository
@@ -94,7 +71,7 @@ jobs:
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::975050265283:role/GHA-CodeBuild-Service-Role
+          role-to-assume: arn:aws:iam::696793786584:role/GHA-CodeBuild-Service-Role
           aws-region: eu-west-2
           
       - name: Setup Terraform
@@ -103,10 +80,10 @@ jobs:
           terraform_version: 1.10.4
           
       - name: Initialize Terraform
-        run: ./run.sh ${{ matrix.env }} init
+        run: ./run.sh ${{ inputs.environment }} init
         
       - name: Run Terraform plan
-        run: make apply ${{ matrix.env }}
-        
+        run: make plan ${{ inputs.environment }}
+
       - name: Run Terraform apply
-        run: make apply ${{ matrix.env }}
+        run: make apply ${{ inputs.environment }}
