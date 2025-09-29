@@ -8,8 +8,8 @@ flowchart LR
     Security --> Plan[📋 Terraform Plan<br/>Production]
     Plan --> Senior[👔 Senior Team<br/>Approval]
     Senior --> Backup[💾 Pre-deployment<br/>Backup]
-    Backup --> BlueGreen[🔄 Blue-Green<br/>Deployment]
-    BlueGreen --> Health[❤️ Health Checks<br/>& Monitoring]
+    Backup --> Deploy[🚀 Deploy to<br/>Production]
+    Deploy --> Health[❤️ Health Checks<br/>& Monitoring]
     Health --> Smoke[🧪 Smoke Tests<br/>& Validation]
     Smoke --> Traffic[🔀 Traffic Switch<br/>to New Version]
     Traffic --> Live[🌟 Production<br/>Live]
@@ -40,7 +40,7 @@ flowchart LR
     classDef trigger fill:#6C757D,stroke:#fff,stroke-width:2px,color:#fff
     
     class Traffic,Live success
-    class GHA,BlueGreen,Health process
+    class GHA,Deploy,Health process
     class Security,Plan,Smoke validation
     class Senior,Backup approval
     class Rollback,Previous,Investigate,Review rollback
@@ -63,7 +63,7 @@ flowchart LR
 4. **Terraform Plan**: Generate production infrastructure changes
 5. **Senior Approval**: Senior team and management review
 6. **Pre-deployment Backup**: Create full system backup
-7. **Blue-Green Deployment**: Deploy to parallel environment
+7. **Deploy to Production**: Deploy directly to production environment
 8. **Health Checks**: Comprehensive system health validation
 9. **Smoke Tests**: Critical functionality validation
 10. **Traffic Switch**: Gradually shift traffic to new version
@@ -82,11 +82,10 @@ flowchart LR
 
 ### Deployment Strategy
 
-#### Blue-Green Deployment
-- **Blue Environment**: Current production version
-- **Green Environment**: New version being deployed
-- **Traffic Switching**: Gradual migration from blue to green
-- **Rollback Capability**: Instant switch back to blue if issues
+#### Direct Production Deployment
+- **Strategy**: Direct deployment to production environment
+- **Validation**: Comprehensive pre-deployment testing in staging
+- **Rollback Capability**: Terraform state rollback if issues occur
 
 #### Health Checks
 - **Application Health**: API endpoints responding correctly
@@ -104,7 +103,7 @@ flowchart LR
 - ✅ All security and compliance checks pass
 - ✅ Senior team approval obtained
 - ✅ Pre-deployment backup completed successfully
-- ✅ Blue-green deployment executes without errors
+- ✅ Production deployment executes without errors
 - ✅ All health checks pass
 - ✅ Smoke tests validate critical functionality
 - ✅ Traffic switch completes successfully

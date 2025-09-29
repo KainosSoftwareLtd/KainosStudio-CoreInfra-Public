@@ -174,7 +174,7 @@ TF_VAR_session_secret
 5. Terraform plan
 6. Senior team approval gate
 7. Pre-deployment backup
-8. Blue-green deployment
+8. Standard deployment
 9. Health checks
 10. Smoke tests
 11. Traffic switching

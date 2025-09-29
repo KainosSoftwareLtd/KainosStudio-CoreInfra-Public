@@ -8,16 +8,87 @@ The Kainos Studio infrastructure implements a multi-tier network architecture wi
 
 ## 🟠 AWS Network Architecture
 
+### Domain and URL Configuration
+
+| Environment | Domain/URL | SSL Certificate | Purpose |
+|-------------|------------|-----------------|---------|
+| **Development** | `https://dev.core.kainos-studio.com/` | Wildcard SSL | Development testing |
+| **Staging** | `https://staging.core.kainos-studio.com/` | Wildcard SSL | Pre-production validation |
+| **Production** | `https://core.kainos-studio.com/` | Dedicated SSL | Live production service |
+
+#### DNS Configuration
+```hcl
+# Development
+resource "aws_route53_record" "dev" {
+  zone_id = var.hosted_zone_id
+  name    = "dev.core.kainos-studio.com"
+  type    = "A"
+  
+  alias {
+    name                   = aws_cloudfront_distribution.dev.domain_name
+    zone_id                = aws_cloudfront_distribution.dev.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+# Staging
+resource "aws_route53_record" "staging" {
+  zone_id = var.hosted_zone_id
+  name    = "staging.core.kainos-studio.com"
+  type    = "A"
+  
+  alias {
+    name                   = aws_cloudfront_distribution.staging.domain_name
+    zone_id                = aws_cloudfront_distribution.staging.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+# Production
+resource "aws_route53_record" "prod" {
+  zone_id = var.hosted_zone_id
+  name    = "core.kainos-studio.com"
+  type    = "A"
+  
+  alias {
+    name                   = aws_cloudfront_distribution.prod.domain_name
+    zone_id                = aws_cloudfront_distribution.prod.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+```
+
+### Account Structure
+
+| Environment | AWS Account | Purpose |
+|-------------|-------------|---------|
+| **Development** | Shared Account | Development and testing |
+| **Staging** | Shared Account | Pre-production validation |
+| **Production** | Dedicated Account | Production workloads with enhanced security |
+
 ### VPC Design
 
+#### Development and Staging (Shared Account)
 | Component | Configuration | Purpose |
 |-----------|---------------|---------|
 | **VPC CIDR** | 10.0.0.0/16 | Main network space |
-| **Availability Zones** | 3 AZs minimum | High availability |
+| **Availability Zones** | 2-3 AZs | High availability |
 | **DNS Resolution** | Enabled | Service discovery |
 | **DNS Hostnames** | Enabled | Resource naming |
 
+#### Production (Dedicated Account)
+| Component | Configuration | Purpose |
+|-----------|---------------|---------|
+| **VPC CIDR** | 10.1.0.0/16 | Isolated production network |
+| **Availability Zones** | 3 AZs minimum | Maximum availability |
+| **DNS Resolution** | Enabled | Service discovery |
+| **DNS Hostnames** | Enabled | Resource naming |
+| **Flow Logs** | Enabled to S3 | Enhanced monitoring |
+| **VPC Peering** | Cross-account if needed | Secure connectivity |
+
 #### VPC Configuration
+
+##### Development/Staging VPC
 ```hcl
 resource "aws_vpc" "kainos_core" {
   cidr_block           = "10.0.0.0/16"
@@ -27,17 +98,54 @@ resource "aws_vpc" "kainos_core" {
   tags = {
     Name        = "kainos-core-vpc-${var.environment}"
     Environment = var.environment
+    Account     = "shared"
+  }
+}
+```
+
+##### Production VPC
+```hcl
+resource "aws_vpc" "kainos_core_prod" {
+  cidr_block           = "10.1.0.0/16"
+  enable_dns_hostnames = true
+  enable_dns_support   = true
+  
+  tags = {
+    Name        = "kainos-core-vpc-prod"
+    Environment = "production"
+    Account     = "dedicated"
+  }
+}
+
+# Enhanced Flow Logs for Production
+resource "aws_flow_log" "prod_vpc" {
+  iam_role_arn    = aws_iam_role.flow_log.arn
+  log_destination = aws_s3_bucket.flow_logs.arn
+  traffic_type    = "ALL"
+  vpc_id          = aws_vpc.kainos_core_prod.id
+  
+  tags = {
+    Name = "kainos-core-prod-flow-logs"
   }
 }
 ```
 
 ### Subnet Architecture
 
+#### Development and Staging (Shared Account)
 | Subnet Type | CIDR Blocks | Purpose | Internet Access |
 |-------------|-------------|---------|-----------------|
 | **Public Subnets** | 10.0.1.0/24, 10.0.2.0/24, 10.0.3.0/24 | NAT Gateways, Load Balancers | Direct |
 | **Private Subnets** | 10.0.11.0/24, 10.0.12.0/24, 10.0.13.0/24 | Lambda functions, RDS | Via NAT |
 | **Database Subnets** | 10.0.21.0/24, 10.0.22.0/24, 10.0.23.0/24 | Database instances | None |
+
+#### Production (Dedicated Account)
+| Subnet Type | CIDR Blocks | Purpose | Internet Access |
+|-------------|-------------|---------|-----------------|
+| **Public Subnets** | 10.1.1.0/24, 10.1.2.0/24, 10.1.3.0/24 | NAT Gateways, Load Balancers | Direct |
+| **Private Subnets** | 10.1.11.0/24, 10.1.12.0/24, 10.1.13.0/24 | Lambda functions, RDS | Via NAT |
+| **Database Subnets** | 10.1.21.0/24, 10.1.22.0/24, 10.1.23.0/24 | Database instances | None |
+| **Management Subnets** | 10.1.31.0/24, 10.1.32.0/24, 10.1.33.0/24 | Bastion hosts, monitoring | Restricted |
 
 #### Subnet Configuration
 ```hcl
@@ -431,12 +539,21 @@ resource "aws_flow_log" "vpc" {
 
 ### Pre-deployment Security
 
+#### Development and Staging
 - [ ] VPC/VNet CIDR doesn't overlap with existing networks
 - [ ] Security groups/NSGs follow least privilege principle
 - [ ] NACLs configured for defense in depth
 - [ ] VPC endpoints/Private endpoints configured for AWS/Azure services
 - [ ] Flow logs enabled for network monitoring
 - [ ] DNS resolution properly configured
+
+#### Production (Additional Requirements)
+- [ ] Dedicated AWS account with isolated networking
+- [ ] Enhanced VPC Flow Logs to S3 with encryption
+- [ ] Cross-account IAM roles configured securely
+- [ ] Network monitoring and alerting configured
+- [ ] Bastion host access properly configured
+- [ ] Management subnet access restricted to authorized personnel
 
 ### Post-deployment Security
 

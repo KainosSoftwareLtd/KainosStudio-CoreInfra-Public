@@ -16,7 +16,7 @@ The project uses OpenID Connect (OIDC) for secure, keyless authentication from G
 |-----------|---------------|---------|
 | **OIDC Provider** | `https://token.actions.githubusercontent.com` | GitHub Actions identity provider |
 | **Audience** | `sts.amazonaws.com` | AWS STS service identifier |
-| **Thumbprint** | `6938fd4d98bab03faadb97b34396831e3780aea1` | GitHub's certificate thumbprint |
+| **Thumbprint** | `************************************aea1` | GitHub's certificate thumbprint |
 | **Subject Claims** | `repo:org/repo:ref:refs/heads/main` | Repository and branch restrictions |
 
 ### IAM Roles and Policies
@@ -173,6 +173,15 @@ AWS_ROLE_ARN: arn:aws:iam::ACCOUNT:role/GitHubActions-Dev-Role
 AZURE_CLIENT_ID: dev-client-id
 AZURE_TENANT_ID: tenant-id
 AZURE_SUBSCRIPTION_ID: dev-subscription-id
+```
+
+#### Staging Environment
+```yaml
+# GitHub Environment Secrets (with protection rules)
+AWS_ROLE_ARN: arn:aws:iam::ACCOUNT:role/GitHubActions-Staging-Role
+AZURE_CLIENT_ID: staging-client-id
+AZURE_TENANT_ID: tenant-id
+AZURE_SUBSCRIPTION_ID: staging-subscription-id
 ```
 
 #### Production Environment
