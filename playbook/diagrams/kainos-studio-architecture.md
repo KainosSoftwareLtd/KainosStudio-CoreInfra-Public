@@ -13,7 +13,7 @@ graph TB
         direction TB
         subgraph AWSCompute["Compute Layer"]
             LambdaCore[⚡ Lambda<br/>Core Application]
-            LambdaUpload[⚡ Lambda<br/>Upload Handler]
+            LambdaKFDApi[⚡ Lambda<br/>KFD API Handler]
         end
         
         subgraph AWSStorage["Storage Layer"]
@@ -65,7 +65,7 @@ graph TB
     LambdaCore --> S3KFD
     LambdaCore --> S3Forms
     LambdaCore --> DynamoDB
-    LambdaUpload --> S3KFD
+    LambdaKFDApi --> S3KFD
     
     FunctionCore --> StorageKFD
     FunctionCore --> StorageForms
@@ -74,7 +74,7 @@ graph TB
     
     %% Monitoring connections
     LambdaCore -.-> CloudWatch
-    LambdaUpload -.-> CloudWatch
+    LambdaKFDApi -.-> CloudWatch
     FunctionCore -.-> AppInsights
     FunctionUpload -.-> AppInsights
     
@@ -89,7 +89,7 @@ graph TB
     classDef app fill:#28A745,stroke:#fff,stroke-width:2px,color:#fff
     classDef external fill:#6C757D,stroke:#fff,stroke-width:2px,color:#fff
     
-    class AWS,AWSCompute,AWSStorage,AWSMonitoring,AWSSecurity,LambdaCore,LambdaUpload,S3KFD,S3Forms,DynamoDB,CloudWatch,KMS,Secrets aws
+    class AWS,AWSCompute,AWSStorage,AWSMonitoring,AWSSecurity,LambdaCore,LambdaKFDApi,S3KFD,S3Forms,DynamoDB,CloudWatch,KMS,Secrets aws
     class Azure,AzureCompute,AzureStorage,AzureMonitoring,AzureSecurity,FunctionCore,FunctionUpload,StorageKFD,StorageForms,CosmosDB,AppInsights,KeyVault azure
     class Users,GitHub external
 ```
