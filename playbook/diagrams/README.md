@@ -33,6 +33,7 @@ All Mermaid diagrams render directly in GitHub for easy viewing and collaboratio
 ## 🔄 Updating Diagrams
 
 When infrastructure changes:
+
 1. Update the relevant `.md` file with Mermaid syntax
 2. Test rendering in GitHub
 3. Commit changes to version control
