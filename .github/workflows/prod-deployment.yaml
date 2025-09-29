@@ -1,4 +1,4 @@
-name: Kainos Core AWS Prod Deployment 
+name: Prod AWS Deployment 
 
 on:
   workflow_dispatch:
@@ -19,58 +19,84 @@ defaults:
 
 jobs:
   plan:
-    name: Production Plan
+    name: ${{ matrix.env }} Plan
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false  
+      matrix:
+        env: [global, prod]
+        include:
+          - env: global
+            display-name: Global
+          - env: prod
+            display-name: Production
     
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
+      
+      - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::696793786584:role/GHA-CodeBuild-Service-Role
           aws-region: eu-west-2
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.8
-
-      - name: Initialize Terraform
-        run: ./run.sh prod init
-
-      - name: Run Terraform validation and checkov
-        run: make check prod
-
-      - name: Run Terraform plan
-        id: plan
-        run: make prod plan
-
-  apply:
-    name: Production Apply
-    needs: plan
-    if: ${{ github.event.inputs.Apply == 'true' }}
-    runs-on: ubuntu-latest
-    environment: Production
-    
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::696793786584:role/GHA-CodeBuild-Service-Role
-          aws-region: eu-west-2
-
+          
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.10.4
-
+          
+      - name: Install Checkov
+        run: pip3 install checkov==3.2.365
+        
       - name: Initialize Terraform
-        run: ./run.sh prod init
-
+        run: ./run.sh ${{ matrix.env }} init
+        
+      - name: Run Terraform validation and checkov
+        run: make check ${{ matrix.env }}
+        
+      - name: Run Terraform plan
+        id: plan
+        run: make plan ${{ matrix.env }}
+  
+  apply:
+    name: ${{ matrix.env }} Apply
+    needs: plan
+    if: ${{ github.event.inputs.Apply == 'true' }}
+    runs-on: ubuntu-latest
+    environment: ${{ matrix.github-environment }}
+    strategy:
+      fail-fast: false  
+      matrix:
+        env: [global, prod]
+        include:
+          - env: global
+            display-name: Global
+            github-environment: Global
+          - env: prod
+            display-name: Production
+            github-environment: Prod
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::696793786584:role/GHA-CodeBuild-Service-Role
+          aws-region: eu-west-2
+          
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.4
+          
+      - name: Initialize Terraform
+        run: ./run.sh ${{ matrix.env }} init
+        
+      - name: Run Terraform plan
+        run: make plan ${{ matrix.env }}
+        
       - name: Run Terraform apply
-        run: make prod apply
+        run: make apply ${{ matrix.env }}

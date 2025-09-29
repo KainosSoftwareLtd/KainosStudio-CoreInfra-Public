@@ -1,4 +1,4 @@
-name: Kainos Core AWS Deployment 
+name: Non-Prod AWS Deployment 
 
 on:
   workflow_dispatch:

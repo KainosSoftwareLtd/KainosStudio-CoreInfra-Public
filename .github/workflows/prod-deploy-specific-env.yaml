@@ -1,4 +1,4 @@
-name: Kainos Core AWS Prod Specific Deployment 
+name: Prod AWS Deployment - Specific Environment
 
 on:
   workflow_dispatch:
@@ -43,12 +43,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.10.4
-          
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-          
+        
       - name: Install Checkov
         run: pip3 install checkov==3.2.365
         

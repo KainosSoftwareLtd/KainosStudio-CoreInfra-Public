@@ -57,6 +57,49 @@ jobs:
       - name: Run Terraform plan
         id: plan
         run: make plan ${{ matrix.env }}
+
+  aws-prod-validation:
+    name: AWS Prod PR Validation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: aws/prod-infra
+    strategy:
+      fail-fast: false
+      matrix:
+        env: [global, prod]
+        include:
+          - env: global
+            display-name: Global
+          - env: prod
+            display-name: Prod
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::696793786584:role/GHA-CodeBuild-Service-Role
+          aws-region: eu-west-2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.4
+
+      - name: Install Checkov
+        run: pip3 install checkov==3.2.365
+
+      - name: Initialize Terraform
+        run: ./run.sh ${{ matrix.env }} init
+
+      - name: Run Terraform validation and checkov
+        run: make check ${{ matrix.env }}
+
+      - name: Run Terraform plan
+        id: plan
+        run: make plan ${{ matrix.env }}
   
   roles-plan:
     name: Roles Plan
@@ -80,10 +123,40 @@ jobs:
         with:
           terraform_version: 1.10.4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - name: Install Checkov
+        run: pip3 install checkov==3.2.365
+
+      - name: Initialize Terraform (roles)
+        run: ./run.sh roles init
+
+      - name: Run Terraform validation and checkov (roles)
+        run: make check roles
+
+      - name: Run Terraform plan (roles)
+        id: plan
+        run: make plan roles
+
+  prod-roles-plan:
+    name: Prod Roles Plan
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: aws/prod-infra
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          python-version: '3.10'
+          role-to-assume: arn:aws:iam::696793786584:role/GHA_Role_Creator_Role
+          aws-region: eu-west-2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.4
 
       - name: Install Checkov
         run: pip3 install checkov==3.2.365

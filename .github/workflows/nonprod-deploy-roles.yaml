@@ -1,4 +1,4 @@
-name: Kainos Core AWS Roles Deployment
+name: Non-Prod AWS Roles Deployment
 
 on:
   workflow_dispatch:
