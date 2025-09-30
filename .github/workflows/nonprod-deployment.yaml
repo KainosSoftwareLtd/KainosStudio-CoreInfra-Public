@@ -48,11 +48,6 @@ jobs:
         with:
           terraform_version: 1.10.4
           
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-          
       - name: Install Checkov
         run: pip3 install checkov==3.2.365
         
@@ -65,6 +60,13 @@ jobs:
       - name: Run Terraform plan
         id: plan
         run: make plan ${{ matrix.env }}
+        
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-${{ matrix.env }}
+          path: ${{ matrix.env }}/plan-${{ matrix.env }}.tfplan
+          retention-days: 1
   
   apply:
     name: ${{ matrix.env }} Apply
@@ -105,8 +107,11 @@ jobs:
       - name: Initialize Terraform
         run: ./run.sh ${{ matrix.env }} init
         
-      - name: Run Terraform plan
-        run: make apply ${{ matrix.env }}
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-${{ matrix.env }}
+          path: ${{ matrix.env }}/
         
       - name: Run Terraform apply
         run: make apply ${{ matrix.env }}
