@@ -62,13 +62,6 @@ jobs:
       - name: Run Terraform plan
         id: plan
         run: make plan ${{ inputs.environment }}
-        
-      - name: Upload Terraform Plan
-        uses: actions/upload-artifact@v4
-        with:
-          name: tfplan-${{ inputs.environment }}
-          path: ${{ inputs.environment }}/plan-${{ inputs.environment }}.tfplan
-          retention-days: 1
   
   apply:
     name: Apply - ${{ inputs.environment }}
@@ -95,11 +88,8 @@ jobs:
       - name: Initialize Terraform
         run: ./run.sh ${{ inputs.environment }} init
         
-      - name: Download Terraform Plan
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan-${{ inputs.environment }}
-          path: ${{ inputs.environment }}/
+      - name: Run Terraform plan
+        run: make plan ${{ inputs.environment }}
 
       - name: Run Terraform apply
         run: make apply ${{ inputs.environment }}
