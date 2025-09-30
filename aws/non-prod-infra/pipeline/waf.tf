@@ -105,26 +105,6 @@ resource "aws_wafv2_web_acl" "cloudfront_acl" {
     }
   }
 
-  # AWS Managed Common Rule Set
-  rule {
-    name     = "AWSManagedRulesCommonRuleSet"
-    priority = 1
-    statement {
-      managed_rule_group_statement {
-        name        = "AWSManagedRulesCommonRuleSet"
-        vendor_name = "AWS"
-      }
-    }
-    override_action {
-      none {}
-    }
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name                = "AWSManagedRulesCommonRuleSet"
-      sampled_requests_enabled   = true
-    }
-  }
-
   # AWS Managed Known Bad Inputs Rule Set
   rule {
     name     = "AWSManagedRulesKnownBadInputsRuleSet"
