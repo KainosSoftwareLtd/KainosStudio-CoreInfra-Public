@@ -87,11 +87,8 @@ jobs:
       - name: Initialize Terraform (roles)
         run: ./run.sh roles init
       
-      - name: Download Terraform Plan
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan-roles
-          path: roles/
+      - name: Run Terraform plan (roles)
+        run: make plan roles
 
       - name: Run Terraform apply (roles)
         run: make apply roles
