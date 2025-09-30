@@ -60,6 +60,13 @@ jobs:
       - name: Run Terraform plan
         id: plan
         run: make plan ${{ matrix.env }}
+        
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-${{ matrix.env }}
+          path: ${{ matrix.env }}/plan-${{ matrix.env }}.tfplan
+          retention-days: 1
   
   apply:
     name: ${{ matrix.env }} Apply

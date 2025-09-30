@@ -49,6 +49,13 @@ jobs:
       - name: Run Terraform plan (roles)
         id: plan
         run: make plan roles
+        
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-roles
+          path: roles/plan-roles.tfplan
+          retention-days: 1
 
   apply:
     name: Roles Apply
