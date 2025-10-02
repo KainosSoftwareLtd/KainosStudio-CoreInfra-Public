@@ -52,6 +52,7 @@ data "aws_iam_policy_document" "codebuild_assume_role_policy" {
         "repo:KainosSoftwareLtd/KainosStudio-CoreInfra-Public:environment:Staging",
         "repo:KainosSoftwareLtd/KainosStudio-CoreApp-Public:environment:Dev",
         "repo:KainosSoftwareLtd/KainosStudio-CoreApp-Public:environment:Staging",
+        "repo:KainosSoftwareLtd/KainosStudio-CoreApp-Public:environment:Prod"
       ]
     }
 
