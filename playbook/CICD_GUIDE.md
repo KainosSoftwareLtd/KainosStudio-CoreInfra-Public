@@ -6,7 +6,7 @@ This guide documents the CI/CD workflows and GitHub Actions for the Kainos Studi
 
 The project uses GitHub Actions for automated CI/CD across multiple environments and cloud providers.
 
-## 📁 Workflow Structure
+## 📁 Workflow Structure - Example Files
 
 ```
 .github/workflows/
@@ -19,6 +19,25 @@ The project uses GitHub Actions for automated CI/CD across multiple environments
 ├── pre-commit.yml       # Code quality checks
 └── security-scan.yml    # Security scanning
 ```
+
+## 📋 Actual Workflow Files
+
+### Non-Prod-Infra (Dev ~ Staging)
+
+| Workflow File | Summary | Active |
+|---------------|---------|--------|
+| `pull-request.yaml` | Validates PR changes across dev/staging environments with Terraform plan and Checkov security scanning | ✅ |
+| `nonprod-deployment.yaml` | Manual deployment workflow for non-prod infrastructure with apply option | ✅ |
+| `nonprod-deploy-specific-env.yaml` | Targeted deployment to specific non-prod environments (pipeline/dev/staging) | ✅ |
+| `nonprod-deploy-roles.yaml` | Deploys IAM roles and permissions for non-prod environments | ✅ |
+
+### Prod-Infra (Prod)
+
+| Workflow File | Summary | Active |
+|---------------|---------|--------|
+| `prod-deployment.yaml` | Manual deployment workflow for production infrastructure with apply option | ✅ |
+| `prod-deploy-specific-env.yaml` | Targeted deployment to specific production environments | ✅ |
+| `prod-deploy-roles.yaml` | Deploys IAM roles and permissions for production environments | ✅ |
 
 ## 🚀 Workflow Triggers
 
