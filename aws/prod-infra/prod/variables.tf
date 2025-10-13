@@ -122,6 +122,12 @@ variable "api_kfd_name" {
   default     = "kainoscore-kfd-services-"
 }
 
+variable "kfd_api_lambda_alias" {
+  type        = string
+  description = "Alias For Fabric/KFD API Lambda"
+  default     = "KFDAPILambda"
+}
+
 # (Note: api_kfd_name, api_fabric_name, region, env, logs_retention_days, creator already defined above)
 
 variable "cloudfront_stage" {

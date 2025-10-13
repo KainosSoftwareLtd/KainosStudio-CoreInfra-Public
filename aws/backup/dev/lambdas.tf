@@ -34,7 +34,8 @@ module "core_lambda" {
   s3_bucket = local.s3_bucket_zip_files_name
   s3_key    = "kainoscore-code.zip"
 
-  publish = false
+  # Enable publishing so new versions are created when code changes. Required for Provisioned Concurrency and aliasing.
+  publish = true
 }
 
 module "kfd_api_lambda" {
@@ -66,5 +67,6 @@ module "kfd_api_lambda" {
   s3_bucket = local.s3_bucket_zip_files_name
   s3_key    = "kfd-api.zip"
 
-  publish = false
+  # Enable publishing so new versions are created when code changes. Required for Provisioned Concurrency and aliasing.
+  publish = true
 }
