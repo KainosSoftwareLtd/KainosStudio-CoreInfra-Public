@@ -29,13 +29,10 @@ module "core_lambda" {
   lambda_execution_role_arn = aws_iam_role.lambda_execution_role.arn
   cloudwatch_kms_key_id     = data.aws_kms_alias.cw.target_key_arn
   tags                      = local.tags
-
   # S3 source configuration
   s3_bucket = local.s3_bucket_zip_files_name
   s3_key    = "kainoscore-code.zip"
-
-  # Enable publishing so new versions are created when code changes. Required for Provisioned Concurrency and aliasing.
-  publish = true
+  publish   = true
 }
 
 module "kfd_api_lambda" {
