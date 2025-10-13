@@ -203,6 +203,12 @@ variable "core_lambda_alias" {
   default     = "CoreLambda"
 }
 
+variable "kfd_api_lambda_alias" {
+  type        = string
+  description = "Alias For Fabric/KFD API Lambda"
+  default     = "KFDAPILambda"
+}
+
 variable "lambda_runtime" {
   type        = string
   description = "Lambda Runtime "

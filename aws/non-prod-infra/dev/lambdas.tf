@@ -29,12 +29,10 @@ module "core_lambda" {
   lambda_execution_role_arn = aws_iam_role.lambda_execution_role.arn
   cloudwatch_kms_key_id     = data.aws_kms_alias.cw.target_key_arn
   tags                      = local.tags
-
   # S3 source configuration
   s3_bucket = local.s3_bucket_zip_files_name
   s3_key    = "kainoscore-code.zip"
-
-  publish = false
+  publish   = true
 }
 
 module "kfd_api_lambda" {
@@ -58,13 +56,12 @@ module "kfd_api_lambda" {
     NODE_ENV       = "production"
   }
   logs_retention_days       = var.logs_retention_days
+  alias_name                = var.kfd_api_lambda_alias
+  publish                   = true
   lambda_execution_role_arn = aws_iam_role.lambda_execution_role.arn
   cloudwatch_kms_key_id     = data.aws_kms_alias.cw.target_key_arn
   tags                      = local.tags
-
   # S3 source configuration
   s3_bucket = local.s3_bucket_zip_files_name
   s3_key    = "kfd-api.zip"
-
-  publish = false
 }

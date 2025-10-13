@@ -61,7 +61,7 @@ resource "aws_api_gateway_integration" "core_put_method_root_integration" {
   http_method             = aws_api_gateway_method.core_root_method.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${module.core_lambda.lambda_function_arn}/invocations"
+  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${module.core_lambda.lambda_alias_arn}/invocations"
 }
 
 # Integration between ANY method on /{proxy+} and a Lambda function
@@ -71,14 +71,14 @@ resource "aws_api_gateway_integration" "core_proxy_integration" {
   http_method             = aws_api_gateway_method.core_proxy_method.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${module.core_lambda.lambda_function_arn}/invocations"
+  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${module.core_lambda.lambda_alias_arn}/invocations"
 }
 
 # Grants API Gateway permission to invoke Lambda for GET method
 resource "aws_lambda_permission" "core_apigw_lambda_get" {
   statement_id  = "AllowExecutionFromAPIGatewayGet"
   action        = "lambda:InvokeFunction"
-  function_name = module.core_lambda.lambda_function_name
+  function_name = module.core_lambda.lambda_alias_arn
   principal     = "apigateway.amazonaws.com" # 
   source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.core_api.id}/*/GET/"
 }
@@ -87,7 +87,7 @@ resource "aws_lambda_permission" "core_apigw_lambda_get" {
 resource "aws_lambda_permission" "core_apigw_lambda_any" {
   statement_id  = "AllowExecutionFromAPIGatewayAny"
   action        = "lambda:InvokeFunction"
-  function_name = module.core_lambda.lambda_function_name
+  function_name = module.core_lambda.lambda_alias_arn
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.core_api.id}/*/*/*"
 }

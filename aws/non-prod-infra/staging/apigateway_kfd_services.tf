@@ -51,7 +51,7 @@ resource "aws_api_gateway_integration" "kfd_put_method_root_integration" {
   http_method             = aws_api_gateway_method.kfd_put_method_root.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${module.kfd_api_lambda.lambda_function_arn}/invocations"
+  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${module.kfd_api_lambda.lambda_alias_arn}/invocations"
 }
 
 resource "aws_api_gateway_method" "kfd_delete_method_services_id" {
@@ -74,7 +74,7 @@ resource "aws_api_gateway_integration" "kfd_delete_method_services_id_integratio
   http_method             = aws_api_gateway_method.kfd_delete_method_services_id.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${module.kfd_api_lambda.lambda_function_arn}/invocations"
+  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${module.kfd_api_lambda.lambda_alias_arn}/invocations"
 }
 
 resource "aws_api_gateway_deployment" "kfd_deployment" {
@@ -126,7 +126,7 @@ resource "aws_api_gateway_method_settings" "kfd_all" {
 resource "aws_lambda_permission" "kfd_upload_trigger" {
   statement_id  = "AllowApiGatewayPut"
   action        = "lambda:InvokeFunction"
-  function_name = module.kfd_api_lambda.lambda_function_name
+  function_name = module.kfd_api_lambda.lambda_alias_arn
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.kfd_api.id}/*/PUT/services"
 }
@@ -134,7 +134,7 @@ resource "aws_lambda_permission" "kfd_upload_trigger" {
 resource "aws_lambda_permission" "kfd_delete_trigger" {
   statement_id  = "AllowApiGatewayDelete"
   action        = "lambda:InvokeFunction"
-  function_name = module.kfd_api_lambda.lambda_function_name
+  function_name = module.kfd_api_lambda.lambda_alias_arn
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.kfd_api.id}/*/DELETE/services/*"
 }
