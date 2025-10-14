@@ -131,6 +131,10 @@ resource "aws_lambda_permission" "kfd_upload_trigger" {
   function_name = "${module.kfd_api_lambda.lambda_function_name}:${var.kfd_api_lambda_alias}"
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.kfd_api.id}/*/PUT/services"
+
+  lifecycle {
+    ignore_changes = [function_name, qualifier]
+  }
 }
 
 resource "aws_lambda_permission" "kfd_delete_trigger" {
@@ -140,6 +144,10 @@ resource "aws_lambda_permission" "kfd_delete_trigger" {
   function_name = "${module.kfd_api_lambda.lambda_function_name}:${var.kfd_api_lambda_alias}"
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.kfd_api.id}/*/DELETE/services/*"
+
+  lifecycle {
+    ignore_changes = [function_name, qualifier]
+  }
 }
 
 resource "aws_api_gateway_rest_api_policy" "restrict_to_vpc" {
@@ -297,6 +305,10 @@ resource "aws_lambda_permission" "kfd_upload_trigger_regional" {
   function_name = "${module.kfd_api_lambda.lambda_function_name}:${var.kfd_api_lambda_alias}"
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.kfd_api_regional.id}/*/PUT/services"
+
+  lifecycle {
+    ignore_changes = [function_name, qualifier]
+  }
 }
 
 resource "aws_lambda_permission" "kfd_delete_trigger_regional" {
@@ -305,6 +317,10 @@ resource "aws_lambda_permission" "kfd_delete_trigger_regional" {
   function_name = "${module.kfd_api_lambda.lambda_function_name}:${var.kfd_api_lambda_alias}"
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.kfd_api_regional.id}/*/DELETE/services/*"
+
+  lifecycle {
+    ignore_changes = [function_name, qualifier]
+  }
 }
 
 output "kfd_api_gateway_id_regional" {

@@ -73,6 +73,10 @@ resource "aws_lambda_permission" "core_apigw_lambda_get" {
   function_name = "${module.core_lambda.lambda_function_name}:${var.core_lambda_alias}"
   principal     = "apigateway.amazonaws.com" # 
   source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.core_api.id}/*/GET/"
+
+  lifecycle {
+    ignore_changes = [function_name, qualifier]
+  }
 }
 
 resource "aws_lambda_permission" "core_apigw_lambda_any" {
@@ -81,6 +85,10 @@ resource "aws_lambda_permission" "core_apigw_lambda_any" {
   function_name = "${module.core_lambda.lambda_function_name}:${var.core_lambda_alias}"
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.core_api.id}/*/*/*"
+
+  lifecycle {
+    ignore_changes = [function_name, qualifier]
+  }
 }
 
 resource "aws_api_gateway_deployment" "core_deployment" {
@@ -107,6 +115,9 @@ resource "aws_api_gateway_stage" "core_stage" {
   # checkov:skip=CKV2_AWS_51: This Might be Looked into in the future
   # checkov:skip=CKV2_AWS_29: WAF Not Required but will be looked into in the future for Prod
 
+  lifecycle {
+    ignore_changes = [deployment_id]
+  }
 
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.core_api_log_group.arn                                                                                                                                                                                                           # Destination for access logs
@@ -115,7 +126,7 @@ resource "aws_api_gateway_stage" "core_stage" {
 }
 
 resource "aws_api_gateway_rest_api_policy" "restrict_to_cloudfront" {
-  count       = var.env == "prod" || var.env == "prod" ? 1 : 0
+  count       = var.env == "prod" ? 1 : 0
   rest_api_id = aws_api_gateway_rest_api.core_api.id
   policy      = <<EOF
   {
