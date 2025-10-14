@@ -81,6 +81,10 @@ resource "aws_lambda_permission" "core_apigw_lambda_get" {
   function_name = "${module.core_lambda.lambda_function_name}:${var.core_lambda_alias}"
   principal     = "apigateway.amazonaws.com" # 
   source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.core_api.id}/*/GET/"
+
+  lifecycle {
+    ignore_changes = [function_name, qualifier]
+  }
 }
 
 # Grants API Gateway permission to invoke Lambda for ANY method
@@ -90,6 +94,10 @@ resource "aws_lambda_permission" "core_apigw_lambda_any" {
   function_name = "${module.core_lambda.lambda_function_name}:${var.core_lambda_alias}"
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.core_api.id}/*/*/*"
+
+  lifecycle {
+    ignore_changes = [function_name, qualifier]
+  }
 }
 
 # Deploys the API Gateway
@@ -118,6 +126,9 @@ resource "aws_api_gateway_stage" "core_stage" {
   # checkov:skip=CKV2_AWS_51: This Might be Looked into in the future
   # checkov:skip=CKV2_AWS_29: WAF Not Required but will be looked into in the future for Prod
 
+  lifecycle {
+    ignore_changes = [deployment_id]
+  }
 
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.core_api_log_group.arn                                                                                                                                                                                                           # Destination for access logs
