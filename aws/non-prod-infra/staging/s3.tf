@@ -115,18 +115,23 @@ module "s3_core_audit_logs" {
   kms_key_id                         = data.aws_kms_alias.s3.target_key_arn
   enable_public_access_block         = true
   enable_mfa_delete                  = false
-  enable_object_lock                 = true
+  enable_object_lock                 = false
   object_lock_mode                   = "GOVERNANCE"
   object_lock_retention_days         = 30
   enable_lifecycle_expiration        = false
   expiration_days                    = 30
   additional_bucket_policy_documents = [data.aws_iam_policy_document.s3_core_audit_logs_policy.json]
+  is_logging_target                  = true
   # checkov:CKV2_AWS_62: Not required for this bucket
   # checkov:CKV2_AWS_61: Not required for this bucket
   # checkov:CKV_AWS_144: Not required for this project
 }
 
-resource "aws_s3_bucket_acl" "cloudfront_acl" {
-  bucket = local.s3_bucket_core_audit_logs_name
+resource "aws_s3_bucket_acl" "core_audit_logs_acl" {
+  bucket = module.s3_core_audit_logs.bucket_id
   acl    = "log-delivery-write"
+
+  depends_on = [
+    module.s3_core_audit_logs
+  ]
 }

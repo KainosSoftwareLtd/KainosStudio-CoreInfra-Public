@@ -115,6 +115,12 @@ variable "s3_object_ownership" {
   default     = "BucketOwnerPreferred"
 }
 
+variable "is_logging_target" {
+  description = "Whether this bucket is used as a logging target for other S3 buckets"
+  type        = bool
+  default     = false
+}
+
 variable "additional_bucket_policy_documents" {
   description = "Optional list of JSON policy documents to merge with the module's bucket policy"
   type        = list(string)

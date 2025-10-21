@@ -11,7 +11,7 @@ locals {
 #checkov:skip=CKV_AWS_144:Not required for this project
 resource "aws_s3_bucket" "this" {
   bucket              = var.bucket_name
-  object_lock_enabled = var.enable_object_lock
+  object_lock_enabled = var.enable_object_lock && !var.is_logging_target # Cannot have object lock on logging destination
   tags                = local.tags
 }
 
@@ -25,9 +25,9 @@ resource "aws_s3_bucket_versioning" "this" {
   }
 }
 
-#Object Lock (if enabled)
+#Object Lock (if enabled and not a logging target)
 resource "aws_s3_bucket_object_lock_configuration" "this" {
-  count  = var.enable_object_lock ? 1 : 0
+  count  = var.enable_object_lock && !var.is_logging_target ? 1 : 0
   bucket = aws_s3_bucket.this.id
 
   rule {
@@ -67,6 +67,11 @@ resource "aws_s3_bucket_logging" "this" {
   bucket        = aws_s3_bucket.this.id
   target_bucket = var.logging_target_bucket
   target_prefix = var.logging_target_prefix != null ? var.logging_target_prefix : "${var.environment}-bucket-logs/"
+
+  depends_on = [
+    aws_s3_bucket.this,
+    aws_s3_bucket_ownership_controls.this
+  ]
 }
 
 # Server-Side Encryption
@@ -110,7 +115,7 @@ resource "aws_s3_bucket_ownership_controls" "this" {
   bucket = aws_s3_bucket.this.id
 
   rule {
-    object_ownership = var.s3_object_ownership
+    object_ownership = var.is_logging_target ? "BucketOwnerPreferred" : var.s3_object_ownership
   }
 }
 
