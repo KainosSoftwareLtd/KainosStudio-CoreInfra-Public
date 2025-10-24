@@ -81,7 +81,6 @@ resource "aws_lambda_permission" "core_apigw_lambda_get" {
   function_name = "${module.core_lambda.lambda_function_name}:${var.core_lambda_alias}"
   principal     = "apigateway.amazonaws.com" # 
   source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.core_api.id}/*/GET/"
-
   lifecycle {
     ignore_changes = [function_name, qualifier]
   }
@@ -94,7 +93,6 @@ resource "aws_lambda_permission" "core_apigw_lambda_any" {
   function_name = "${module.core_lambda.lambda_function_name}:${var.core_lambda_alias}"
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.core_api.id}/*/*/*"
-
   lifecycle {
     ignore_changes = [function_name, qualifier]
   }
@@ -107,6 +105,8 @@ resource "aws_api_gateway_deployment" "core_deployment" {
     aws_api_gateway_integration.core_put_method_root_integration,
     aws_api_gateway_method.core_proxy_method,
     aws_api_gateway_integration.core_proxy_integration,
+    aws_lambda_permission.core_apigw_lambda_get,
+    aws_lambda_permission.core_apigw_lambda_any,
   ]
   rest_api_id = aws_api_gateway_rest_api.core_api.id
   description = "Deployment of the KainosCore API"
@@ -136,40 +136,40 @@ resource "aws_api_gateway_stage" "core_stage" {
   }
 }
 
-# Restricts API Gateway access to CloudFront in staging
-resource "aws_api_gateway_rest_api_policy" "restrict_to_cloudfront" {
-  count       = var.env == "staging" || var.env == "staging" ? 1 : 0
-  rest_api_id = aws_api_gateway_rest_api.core_api.id
-  policy      = <<EOF
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Effect": "Allow",
-        "Principal": "*",
-        "Action": "execute-api:Invoke",
-        "Resource": "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.core_api.id}/*",
-        "Condition": {
-          "StringEquals": {
-            "aws:SourceArn": "${aws_cloudfront_distribution.distribution.arn}"
-          }
-        }
-      },
-      {
-        "Effect": "Deny",
-        "Principal": "*",
-        "Action": "execute-api:Invoke",
-        "Resource": "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.core_api.id}/*",
-        "Condition": {
-          "StringNotEquals": {
-            "aws:SourceArn": "${aws_cloudfront_distribution.distribution.arn}"
-          }
-        }
-      }
-    ]
-  }
-  EOF
-}
+# # Restricts API Gateway access to CloudFront in staging
+# resource "aws_api_gateway_rest_api_policy" "restrict_to_cloudfront" {
+#   count       = var.env == "staging" || var.env == "staging" ? 1 : 0
+#   rest_api_id = aws_api_gateway_rest_api.core_api.id
+#   policy      = <<EOF
+#   {
+#     "Version": "2012-10-17",
+#     "Statement": [
+#       {
+#         "Effect": "Allow",
+#         "Principal": "*",
+#         "Action": "execute-api:Invoke",
+#         "Resource": "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.core_api.id}/*",
+#         "Condition": {
+#           "StringEquals": {
+#             "aws:SourceArn": "${aws_cloudfront_distribution.distribution.arn}"
+#           }
+#         }
+#       },
+#       {
+#         "Effect": "Deny",
+#         "Principal": "*",
+#         "Action": "execute-api:Invoke",
+#         "Resource": "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.core_api.id}/*",
+#         "Condition": {
+#           "StringNotEquals": {
+#             "aws:SourceArn": "${aws_cloudfront_distribution.distribution.arn}"
+#           }
+#         }
+#       }
+#     ]
+#   }
+#   EOF
+# }
 
 
 # Configures method-level settings for the API stage
